@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class HealthResponse(BaseModel):
@@ -7,8 +7,8 @@ class HealthResponse(BaseModel):
 
 
 class KnowledgeCreate(BaseModel):
-    title: str
-    content: str
+    title: str = Field(..., min_length=3)
+    content: str = Field(..., min_length=10)
 
 
 app = FastAPI()
