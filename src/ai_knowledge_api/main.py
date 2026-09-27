@@ -40,3 +40,9 @@ def knowledge_create(data: KnowledgeCreate) -> KnowledgeResponse:
     knowledge_store[next_id] = knowledge_response
     next_id += 1
     return knowledge_response
+
+
+@app.get("/knowledge")
+def knowledge_list() -> list[KnowledgeResponse]:
+    knowledge_items = list(knowledge_store.values())
+    return knowledge_items
