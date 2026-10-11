@@ -19,6 +19,12 @@ class KnowledgeResponse(BaseModel):
     description: str | None = None
 
 
+class KnowledgePatch(BaseModel):
+    title: str | None = Field(default=None, min_length=3)
+    content: str | None = Field(default=None, min_length=10)
+    description: str | None = None
+
+
 knowledge_store: dict[int, KnowledgeResponse] = {}
 next_id: int = 1
 
@@ -66,6 +72,22 @@ def knowledge_delete(item_id: PositiveInt) -> Response:
     if knowledge_obj is not None:
         knowledge_store.pop(item_id)
         return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    error_message = f"Knowledge item with knowledge id: {item_id} does not exist."
+    raise HTTPException(status.HTTP_404_NOT_FOUND, error_message)
+
+
+@app.patch("/knowledge/{item_id}", response_model=KnowledgeResponse)
+def knowledge_update(item_id: PositiveInt, data: KnowledgePatch) -> KnowledgeResponse:
+    knowledge_obj = knowledge_store.get(item_id)
+    if knowledge_obj is not None:
+        patch_data = data.model_dump(exclude_unset=True)
+        knowledge_obj_dict = knowledge_obj.model_dump()
+        payload = {**knowledge_obj_dict, **patch_data}
+        updated_item = KnowledgeResponse.model_validate(payload)
+        # updated_item = knowledge_obj.model_copy(update=patch_data)
+        knowledge_store[item_id] = updated_item
+        return updated_item
 
     error_message = f"Knowledge item with knowledge id: {item_id} does not exist."
     raise HTTPException(status.HTTP_404_NOT_FOUND, error_message)
