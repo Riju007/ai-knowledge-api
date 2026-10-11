@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, status, Response
+from fastapi import FastAPI, HTTPException, Response, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, PositiveInt
 
 
@@ -32,14 +33,14 @@ def health_check() -> HealthResponse:
 
 
 @app.post("/knowledge")
-def knowledge_create(data: KnowledgeCreate) -> KnowledgeResponse:
+def knowledge_create(data: KnowledgeCreate) -> JSONResponse:
     global next_id
     knowledge_response = KnowledgeResponse(
         id=next_id, title=data.title, content=data.content, description=data.description
     )
     knowledge_store[next_id] = knowledge_response
     next_id += 1
-    return knowledge_response
+    return JSONResponse(knowledge_response.model_dump(), status.HTTP_201_CREATED)
 
 
 @app.get("/knowledge")
